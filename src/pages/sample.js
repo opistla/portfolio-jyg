@@ -1,9 +1,7 @@
 // pages/sample.js
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import getConfig from 'next/config';
 
-// getConfig에서 publicRuntimeConfig 가져오기
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 
