@@ -1,15 +1,45 @@
 import { createClient } from '@supabase/supabase-js';
 
 // 환경 변수에서 Supabase URL과 API 키를 가져옵니다.
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY || '';
 
 // Supabase 클라이언트 인스턴스를 생성합니다.
-const supabase = createClient(supabaseUrl, supabaseKey);
+// 클라이언트 사이드에서만 완전한 초기화를 수행합니다.
+let supabase = null;
+
+if (supabaseUrl && supabaseKey) {
+  supabase = createClient(supabaseUrl, supabaseKey);
+} else {
+  // 환경 변수가 없을 경우 콘솔에 경고 출력
+  if (typeof window !== 'undefined') {
+    console.warn('Supabase URL 또는 API 키가 제공되지 않았습니다. 환경 변수를 확인하세요.');
+  }
+
+  // 빈 메서드를 가진 더미 클라이언트 생성 (SSR 오류 방지)
+  supabase = {
+    from: () => ({
+      select: () => ({ data: [], error: null }),
+      insert: () => ({ data: null, error: null }),
+      update: () => ({ data: null, error: null }),
+      delete: () => ({ data: null, error: null }),
+      eq: () => ({ data: null, error: null }),
+      order: () => ({ data: [], error: null }),
+      single: () => ({ data: null, error: null }),
+    }),
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      signInWithPassword: () => Promise.resolve({ data: null, error: null }),
+      signInAnonymously: () => Promise.resolve({ data: null, error: null }),
+    },
+  };
+}
 
 // Supabase auth API에서 비인증 사용자로도 테이블에 접근할 수 있도록 RLS 정책을 비활성화합니다.
 // 이 방법은 개발 환경에서만 사용해야 합니다. 프로덕션 환경에서는 적절한 보안 정책을 구현해야 합니다.
 const setupAuth = async () => {
+  if (!supabase) return; // supabase가 초기화되지 않았으면 리턴
+
   try {
     const {
       data: { session },
@@ -25,8 +55,8 @@ const setupAuth = async () => {
   }
 };
 
-// 애플리케이션 시작 시 인증 상태 확인
-if (typeof window !== 'undefined') {
+// 애플리케이션 시작 시 인증 상태 확인 - 클라이언트 사이드에서만 실행
+if (typeof window !== 'undefined' && supabase) {
   setupAuth();
 }
 
@@ -41,6 +71,8 @@ const TABLE_NAME = 'experiences';
  */
 export async function getAllExperiences() {
   try {
+    if (!supabase) return []; // supabase가 초기화되지 않았으면 빈 배열 반환
+
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .select('*')
@@ -63,6 +95,8 @@ export async function getAllExperiences() {
  */
 export async function getExperienceById(id) {
   try {
+    if (!supabase) return null; // supabase가 초기화되지 않았으면 null 반환
+
     const { data, error } = await supabase.from(TABLE_NAME).select('*').eq('id', id).single();
 
     if (error) {
@@ -82,6 +116,11 @@ export async function getExperienceById(id) {
  */
 export async function createExperience(experience) {
   try {
+    if (!supabase) {
+      // supabase가 초기화되지 않았으면 클라이언트 측 임시 ID 생성하여 반환
+      return { id: 'temp_' + Date.now(), ...experience };
+    }
+
     // RLS 오류 무시하고 데이터만 일단 전송
     const { data, error } = await supabase.from(TABLE_NAME).insert([experience]).select();
 
@@ -115,6 +154,11 @@ export async function createExperience(experience) {
  */
 export async function updateExperience(id, experience) {
   try {
+    if (!supabase) {
+      // supabase가 초기화되지 않았으면 전달받은 데이터 그대로 반환
+      return { id, ...experience };
+    }
+
     // ID가 임시 ID라면 (클라이언트 측에서 생성된 ID)
     if (typeof id === 'string' && id.startsWith('temp_')) {
       console.warn(
@@ -153,6 +197,8 @@ export async function updateExperience(id, experience) {
  */
 export async function deleteExperience(id) {
   try {
+    if (!supabase) return true; // supabase가 초기화되지 않았으면 성공으로 처리
+
     // ID가 임시 ID라면 (클라이언트 측에서 생성된 ID)
     if (typeof id === 'string' && id.startsWith('temp_')) {
       console.warn(
