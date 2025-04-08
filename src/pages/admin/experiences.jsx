@@ -7,6 +7,33 @@ import {
   deleteExperience,
 } from '@/lib/supabase-client';
 
+// URL을 감지하여 HTML 링크 태그로 변환하는 함수
+const convertUrlsToLinks = (text) => {
+  if (!text) return '';
+
+  // URL 정규식 패턴 (http, https로 시작하는 URL)
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+
+  // URL을 a 태그로 변환
+  return text.split(urlPattern).map((part, i) => {
+    // 짝수 인덱스는 일반 텍스트, 홀수 인덱스는 URL
+    if (urlPattern.test(part)) {
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
 const ExperienceAdmin = () => {
   const router = useRouter();
   const [experiences, setExperiences] = useState([]);
@@ -30,6 +57,11 @@ const ExperienceAdmin = () => {
   // 새 세부 업무 항목
   const [newDetailName, setNewDetailName] = useState('');
   const [newDetailDesc, setNewDetailDesc] = useState('');
+
+  // 세부 업무 수정 상태 관리
+  const [editingDetailIndex, setEditingDetailIndex] = useState(-1);
+  const [editingDetailName, setEditingDetailName] = useState('');
+  const [editingDetailDesc, setEditingDetailDesc] = useState('');
 
   // 성공 메시지 표시 후 일정 시간 후 사라지게 하는 함수
   const showSuccessMessage = (message) => {
@@ -74,6 +106,9 @@ const ExperienceAdmin = () => {
     setNewDetailDesc('');
     setFormMode('add');
     setSelectedExperience(null);
+    setEditingDetailIndex(-1);
+    setEditingDetailName('');
+    setEditingDetailDesc('');
   };
 
   // 폼 제출 처리
@@ -189,6 +224,51 @@ const ExperienceAdmin = () => {
       ...formData,
       details: formData.details.filter((_, i) => i !== index),
     });
+
+    // 현재 수정 중인 항목이 삭제되면 수정 모드 취소
+    if (editingDetailIndex === index) {
+      setEditingDetailIndex(-1);
+      setEditingDetailName('');
+      setEditingDetailDesc('');
+    } else if (editingDetailIndex > index) {
+      // 삭제된 항목 위치보다 아래에 있던 항목을 수정 중이었다면 인덱스 조정
+      setEditingDetailIndex(editingDetailIndex - 1);
+    }
+  };
+
+  // 세부 업무 수정 모드 진입
+  const handleEditDetail = (index) => {
+    const detail = formData.details[index];
+    setEditingDetailIndex(index);
+    setEditingDetailName(detail.name);
+    setEditingDetailDesc(detail.description || '');
+  };
+
+  // 세부 업무 수정 취소
+  const handleCancelEditDetail = () => {
+    setEditingDetailIndex(-1);
+    setEditingDetailName('');
+    setEditingDetailDesc('');
+  };
+
+  // 세부 업무 수정 저장
+  const handleSaveDetail = () => {
+    if (!editingDetailName) return;
+
+    const updatedDetails = [...formData.details];
+    updatedDetails[editingDetailIndex] = {
+      name: editingDetailName,
+      description: editingDetailDesc || '',
+    };
+
+    setFormData({
+      ...formData,
+      details: updatedDetails,
+    });
+
+    setEditingDetailIndex(-1);
+    setEditingDetailName('');
+    setEditingDetailDesc('');
   };
 
   return (
@@ -324,20 +404,72 @@ const ExperienceAdmin = () => {
                     key={index}
                     className="flex flex-col p-3 border border-gray-200 dark:border-gray-700 rounded-md"
                   >
-                    <div className="flex justify-between items-start mb-1">
-                      <strong>{detail.name}</strong>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveDetail(index)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        삭제
-                      </button>
-                    </div>
-                    {detail.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {detail.description}
-                      </p>
+                    {editingDetailIndex === index ? (
+                      /* 수정 모드 */
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="font-medium text-sm">업무명</label>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={handleSaveDetail}
+                              className="text-green-600 hover:text-green-800 text-sm"
+                            >
+                              저장
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelEditDetail}
+                              className="text-gray-500 hover:text-gray-700 text-sm"
+                            >
+                              취소
+                            </button>
+                          </div>
+                        </div>
+                        <input
+                          type="text"
+                          value={editingDetailName}
+                          onChange={(e) => setEditingDetailName(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+                        />
+                        <label className="font-medium text-sm mt-2">업무 설명</label>
+                        <textarea
+                          value={editingDetailDesc}
+                          onChange={(e) => setEditingDetailDesc(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+                          rows="3"
+                        ></textarea>
+                      </div>
+                    ) : (
+                      /* 표시 모드 */
+                      <>
+                        <div className="flex justify-between items-start mb-1">
+                          <strong className="font-semibold text-gray-800 dark:text-gray-100 text-base">
+                            {detail.name}
+                          </strong>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleEditDetail(index)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              수정
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveDetail(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </div>
+                        {detail.description && (
+                          <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-line">
+                            {convertUrlsToLinks(detail.description)}
+                          </p>
+                        )}
+                      </>
                     )}
                   </li>
                 ))}
@@ -362,14 +494,14 @@ const ExperienceAdmin = () => {
                 <label className="block text-sm font-medium mb-1" htmlFor="newDetailDesc">
                   업무 설명
                 </label>
-                <input
-                  type="text"
+                <textarea
                   id="newDetailDesc"
                   value={newDetailDesc}
                   onChange={(e) => setNewDetailDesc(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
                   placeholder="예: React와 TypeScript를 사용한 UI 개발"
-                />
+                  rows="3"
+                ></textarea>
               </div>
             </div>
 
