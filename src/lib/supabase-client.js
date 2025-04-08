@@ -18,15 +18,43 @@ if (supabaseUrl && supabaseKey) {
 
   // 빈 메서드를 가진 더미 클라이언트 생성 (SSR 오류 방지)
   supabase = {
-    from: () => ({
-      select: () => ({ data: [], error: null }),
-      insert: () => ({ data: null, error: null }),
-      update: () => ({ data: null, error: null }),
-      delete: () => ({ data: null, error: null }),
-      eq: () => ({ data: null, error: null }),
-      order: () => ({ data: [], error: null }),
-      single: () => ({ data: null, error: null }),
-    }),
+    from: () => {
+      const methods = {
+        select: () => {
+          return {
+            data: [],
+            error: null,
+            order: () => ({ data: [], error: null }),
+            eq: () => ({ data: null, error: null }),
+            single: () => ({ data: null, error: null }),
+          };
+        },
+        insert: () => ({
+          data: null,
+          error: null,
+          select: () => ({ data: [], error: null }),
+        }),
+        update: () => ({
+          data: null,
+          error: null,
+          eq: () => ({
+            select: () => ({ data: [], error: null }),
+          }),
+        }),
+        delete: () => ({
+          data: null,
+          error: null,
+          eq: () => ({ error: null }),
+        }),
+        eq: () => ({
+          data: null,
+          error: null,
+          single: () => ({ data: null, error: null }),
+        }),
+      };
+
+      return methods;
+    },
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
       signInWithPassword: () => Promise.resolve({ data: null, error: null }),
