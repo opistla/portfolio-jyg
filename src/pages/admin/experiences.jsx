@@ -46,6 +46,7 @@ const ExperienceAdmin = () => {
   const [formMode, setFormMode] = useState('add'); // 'add' 또는 'edit'
   const [formData, setFormData] = useState({
     project: '',
+    projectDescription: '',
     company: '',
     companyType: '',
     client: '',
@@ -95,6 +96,7 @@ const ExperienceAdmin = () => {
   const resetForm = () => {
     setFormData({
       project: '',
+      projectDescription: '',
       company: '',
       companyType: '',
       client: '',
@@ -158,6 +160,7 @@ const ExperienceAdmin = () => {
     setSelectedExperience(experience);
     setFormData({
       project: experience.project,
+      projectDescription: experience.projectDescription || '',
       company: experience.company,
       companyType: experience.companyType || '',
       client: experience.client || '',
@@ -318,6 +321,21 @@ const ExperienceAdmin = () => {
               />
             </div>
 
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-1" htmlFor="projectDescription">
+                프로젝트 소개
+              </label>
+              <textarea
+                id="projectDescription"
+                name="projectDescription"
+                value={formData.projectDescription || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"
+                rows="3"
+                placeholder="프로젝트에 대한 간단한 소개나 설명을 입력하세요"
+              ></textarea>
+            </div>
+
             <div>
               <label className="block text-sm font-medium mb-1" htmlFor="company">
                 회사명 *
@@ -380,7 +398,7 @@ const ExperienceAdmin = () => {
 
             <div>
               <label className="block text-sm font-medium mb-1" htmlFor="role">
-                역할
+                기술 스택
               </label>
               <input
                 type="text"

@@ -51,31 +51,6 @@ const WorkExperience = () => {
     fetchExperiences();
   }, []);
 
-  // 데이터가 없을 때 대체 데이터
-  // const fallbackExperience = {
-  //   id: 'fallback',
-  //   project: 'SK브로드밴드 각종 서비스 개발',
-  //   company: '토모도모',
-  //   companyType: '프리랜서',
-  //   client: 'SK브로드밴드',
-  //   period: '2023년 6월 ~ 2025년 12월',
-  //   role: '각 프로젝트의 공통 컴포넌트 개발',
-  //   details: [
-  //     {
-  //       name: 'AI HubBackoffice 화면 개발',
-  //       description: 'highChart를 이용한 다양한 통계 분석 화면 개발',
-  //     },
-  //     {
-  //       name: 'chatGPT AI상담 내역 화면 개발',
-  //       description: '실시간 API 연결 고객과 AI상담사 채팅 화면 개발',
-  //     },
-  //     {
-  //       name: 'sk 내부 Maptice 화면 개발(maptics, maptics-backoffice, maptics-campaign-bizchat)',
-  //       description: 'Tmap api를 활용한 지도 및 통계 내역 화면 개발',
-  //     },
-  //   ],
-  // };
-
   // 표시할 경력 데이터
   const displayExperiences = experiences.length > 0 ? experiences : [];
 
@@ -116,6 +91,15 @@ const WorkExperience = () => {
           }
         >
           <div className="space-y-4">
+            {exp.projectDescription && (
+              <div>
+                <p className="font-bold">프로젝트 소개</p>
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                  {convertUrlsToLinks(exp.projectDescription)}
+                </p>
+              </div>
+            )}
+
             <div>
               <p className="font-bold">회사명</p>
               <div className="flex items-center gap-2">
@@ -130,7 +114,7 @@ const WorkExperience = () => {
             </div>
 
             <div>
-              <p className="font-bold">역할</p>
+              <p className="font-bold">기술스택</p>
               <p>{exp.role}</p>
             </div>
 
