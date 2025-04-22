@@ -1,5 +1,7 @@
 import { useRouter } from 'next/router';
 import { UiButton } from '@/components';
+import Link from 'next/link';
+import Image from 'next/image';
 
 const Hero = () => {
   const router = useRouter();
@@ -27,7 +29,18 @@ const Hero = () => {
               능력으로 사용자 중심의 솔루션을 제공합니다.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start mb-8 md:mb-0">
-              <UiButton label="Skill Inventory" onClick={() => router.push('/inventory')} />
+              <div className="relative group">
+                {/* 버튼 뒤에 나타나는 강조 효과 */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg blur opacity-30 group-hover:opacity-80 transition duration-300"></div>
+                <div className="relative">
+                  <UiButton
+                    label="스킬이력 보기"
+                    onClick={() => router.push('/inventory')}
+                    size="large"
+                    className="font-bold"
+                  />
+                </div>
+              </div>
               <UiButton
                 variant="secondary"
                 label="연락하기"
@@ -38,16 +51,14 @@ const Hero = () => {
 
           {/* 프로필 이미지 */}
           <div className="mt-4 md:mt-0 md:ml-4">
-            <div className="relative w-[220px] h-[220px] rounded-lg overflow-hidden shadow-xl">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-90"></div>
-              <div className="absolute inset-0 flex items-center justify-center text-white">
-                <div className="text-center">
-                  <div className="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-3">
-                    <span className="font-bold text-3xl">JYG</span>
-                  </div>
-                  <p className="text-lg font-medium">Full Stack Developer</p>
-                </div>
-              </div>
+            <div className="relative w-[220px] h-[220px] rounded-full overflow-hidden shadow-xl">
+              <Image
+                src="/images/myprofile.jpeg"
+                alt="프로필 이미지"
+                fill
+                priority
+                className="object-cover"
+              />
             </div>
 
             {/* 여백을 채우는 기술 스택 아이콘 */}

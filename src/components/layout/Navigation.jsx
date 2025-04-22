@@ -16,7 +16,9 @@ const Navigation = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <span className="text-xl font-bold font-[family-name:var(--font-geist-sans)]">JYG</span>
+            <span className="text-xl font-bold font-[family-name:var(--font-geist-sans)]">
+              J PLUS
+            </span>
           </div>
           <div className="hidden md:block">
             <div className="ml-10 flex items-center space-x-4">
