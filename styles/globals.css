@@ -1,0 +1,64 @@
+@import 'tailwindcss/preflight';
+@tailwind utilities;
+
+@layer components {
+  /* 격자 배경 패턴 */
+  .bg-grid-pattern {
+    background-image: linear-gradient(to right, rgba(30, 64, 175, 0.5) 2px, transparent 2px),
+      linear-gradient(to bottom, rgba(30, 64, 175, 0.5) 2px, transparent 2px);
+    background-size: 30px 30px;
+  }
+
+  /* 코드 효과 */
+  .code-effect {
+    text-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    font-family: 'Courier New', monospace;
+  }
+
+  /* 불투명도 클래스 */
+  .opacity-15 {
+    opacity: 0.15;
+  }
+
+  .opacity-40 {
+    opacity: 0.4;
+  }
+
+  .opacity-50 {
+    opacity: 0.5;
+  }
+
+  .opacity-75 {
+    opacity: 0.75;
+  }
+}
+
+/* 애니메이션 효과 */
+@keyframes marqueeAnim {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes pulseAnim {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@layer utilities {
+  .animate-marquee {
+    animation: marqueeAnim 30s linear infinite;
+  }
+
+  .animate-pulse-custom {
+    animation: pulseAnim 5s ease-in-out infinite;
+  }
+}

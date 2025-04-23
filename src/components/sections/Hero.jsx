@@ -14,8 +14,8 @@ const Hero = () => {
   };
 
   return (
-    <section id="about" className="pt-20 md:pt-32 pb-16 md:pb-24">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="about" className="pt-20 md:pt-32 pb-16 md:pb-24 relative">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* 좌우 레이아웃 간격 조정 및 공간 효율화 */}
         <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
           {/* 자기소개 텍스트 - 너비 조정 */}
